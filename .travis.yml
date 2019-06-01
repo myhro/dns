@@ -2,17 +2,16 @@ language: go
 sudo: false
 
 go:
-  - 1.10.x
   - 1.11.x
   - 1.12.x
   - tip
 
-before_install:
-  # don't use the miekg/dns when testing forks
-  - mkdir -p $GOPATH/src/github.com/miekg
-  - ln -s $TRAVIS_BUILD_DIR $GOPATH/src/github.com/miekg/ || true
-
 script:
+  - GO111MODULE=on go mod vendor
+  - if git status --short | grep --quiet 'vendor/'; then
+        echo "'vendor/' directory needs to be updated.";
+        travis_terminate 1;
+    fi
   - go test -race -v -bench=. -coverprofile=coverage.txt -covermode=atomic ./...
 
 after_success:
